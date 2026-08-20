@@ -11,6 +11,7 @@
 - `scripts/migrate_tools_*.sh` + `docs/TOOLS.md` — codex/grok 工具迁移
 - `docs/BASELINE.md` — 基线指标与测试矩阵（每个实验的对照基准）
 - `docs/EXPERIMENTS.md` — 实验清单与分支规范
+- `HANDOFF.md` — 会话交接记录（当前进度/待办/验证命令）
 
 ## 新机器上手（迁移指南）
 
