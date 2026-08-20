@@ -8,6 +8,7 @@
 
 - `AGENTS.md` — 环境信息、踩坑记录、架构速查、学习顺序（任务的"核心上下文"，换机器第一件事）
 - `scripts/` — 新机器一键恢复脚本（装依赖 / 下模型 / 冒烟测试）
+- `scripts/migrate_tools_*.sh` + `docs/TOOLS.md` — codex/grok 工具迁移
 - `docs/BASELINE.md` — 基线指标与测试矩阵（每个实验的对照基准）
 - `docs/EXPERIMENTS.md` — 实验清单与分支规范
 
@@ -28,6 +29,10 @@ bash scripts/download_model.sh
 # 4. 冒烟测试 + 基线
 bash scripts/smoke_test.sh
 ```
+
+> 若走 AutoDL **保存镜像**迁移（推荐）：系统盘（含 conda/flash-attn、工具、模型、源码）
+> 已随镜像恢复，无需 setup_env.sh；此时只需 clone 本仓库把 AGENTS.md 复制到 agent 工作目录
+> （数据盘默认工作目录）即可恢复全部上下文。
 
 ## 日常流程
 

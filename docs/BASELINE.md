@@ -6,7 +6,7 @@
 
 - 机器/GPU：AutoDL RTX 3090 24GB（本机首测）；README 官方：RTX 4070 Laptop 8GB
 - 软件：torch 2.5.1+cu124 / flash-attn 2.7.4.post1（源码编译 sm86）/ transformers 5.15.0
-- 模型：Qwen/Qwen3-0.6B（bf16，28 层，本地路径 /root/autodl-tmp/huggingface/Qwen3-0.6B）
+- 模型：Qwen/Qwen3-0.6B（bf16，28 层，本地路径 /root/huggingface/Qwen3-0.6B）
 - 记录日期：2026-08-19
 
 ## 最新基线（bench.py 原样）

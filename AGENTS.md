@@ -7,8 +7,19 @@
 - GPU：NVIDIA GeForce RTX 3090（24 GB，驱动 595.71.05，驱动级 CUDA 13.2）
 - CPU 20 核，内存 90 GB
 - Python 3.12.3，PyTorch 2.5.1+cu124，triton 3.1.0
-- 数据盘：`/root/autodl-tmp`（NVMe 50 GB，速度快；实例关机数据保留，但保存镜像时不会带上）
-- 模型权重建议放 `/root/autodl-tmp/huggingface/...`（数据盘），不要放系统盘
+
+### 磁盘与迁移策略（2026-08-20 更新）
+
+- **工作数据全部放系统盘**：项目源码 `/root/nano-vllm`、学习仓库 `/root/nano-vllm-learning`、
+  模型权重 `/root/huggingface/Qwen3-0.6B`。
+- 数据盘 `/root/autodl-tmp` 不再存放项目数据，只保留 AutoDL 系统文件（`.autodl`）与
+  当前工作区的 `AGENTS.md` 副本。
+- 迁移方式：**AutoDL 保存自定义镜像**（系统盘随镜像走，数据盘不随镜像走）。新机器从镜像
+  创建后：环境/工具/登录态/模型/源码原样恢复；若换 GPU 架构需按"踩坑记录"重编 flash-attn。
+- 系统盘 30 GB：conda(~6.5G) + 工具(~1.5G) + 模型(1.5G) + 源码，余量充足，但别把大缓存/日志堆进去。
+- GitHub 兜底：`https://github.com/wxgmjfhy/nano-vllm-learning`（AGENTS.md/脚本/实验记录），
+  实例释放或镜像损坏时不丢上下文。新机器上若 agent 工作目录在数据盘，先把
+  `/root/nano-vllm-learning/AGENTS.md` 复制到工作目录再继续。
 
 ### 依赖现状（2026-08-19 已全部装好）
 
@@ -28,7 +39,7 @@
   ```bash
   HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1 \
     huggingface-cli download Qwen/Qwen3-0.6B \
-    --local-dir /root/autodl-tmp/huggingface/Qwen3-0.6B
+    --local-dir /root/huggingface/Qwen3-0.6B
   ```
 - **长任务会断**：exec 命令返回时会清掉其后台子进程；长时间挂着的会话也会被回收。长任务请用 `tmux new-session -d -s <name> '<cmd> > log 2>&1'` 跑，再轮询日志。
 - GitHub 直连慢/断，下载大文件可试 gh-proxy.com（单连接约 0.5MB/s，且中途会断，配合 `curl -C -` 续传）；优先找 hf-mirror 上的替代资源。
@@ -44,7 +55,7 @@
 
 仓库：`https://github.com/GeeeekExplorer/nano-vllm`
 
-本地副本：`/root/autodl-tmp/nano-vllm`（由 codeload tarball 解压，**无 .git**，如需更新用上面 codeload 方式重下）
+本地副本：`/root/nano-vllm`（由 codeload tarball 解压，**无 .git**，如需更新用上面 codeload 方式重下）
 
 nano-vllm 是一个从零实现的轻量级 vLLM：离线批量推理，API 仿照 vLLM（`LLM` / `SamplingParams` / `generate`），全部代码约 1,450 行 Python。官方基准（RTX 4070 Laptop 8GB、Qwen3-0.6B、256 条序列）：Nano-vLLM 1434 tok/s，vLLM 1362 tok/s。
 
@@ -88,18 +99,16 @@ nanovllm/
 
 ```bash
 # 1. 装依赖（见上）
-# 2. 下载模型（Qwen3-0.6B，约 1.2 GB）
-huggingface-cli download --resume-download Qwen/Qwen3-0.6B \
-  --local-dir /root/autodl-tmp/huggingface/Qwen3-0.6B/ \
-  --local-dir-use-symlinks False
-# 3. 注意：example.py / bench.py 里默认模型路径是 ~/huggingface/Qwen3-0.6B/，
-#    已建软链 /root/huggingface -> /root/autodl-tmp/huggingface，默认路径直接可用
-cd /root/autodl-tmp/nano-vllm
+# 2. 下载模型（Qwen3-0.6B，约 1.2 GB，放系统盘）
+HF_ENDPOINT=https://hf-mirror.com HF_HUB_DISABLE_XET=1 \
+  huggingface-cli download Qwen/Qwen3-0.6B --local-dir /root/huggingface/Qwen3-0.6B
+# 3. 运行（example.py / bench.py 默认路径 ~/huggingface/Qwen3-0.6B/ 即 /root/huggingface/...）
+cd /root/nano-vllm
 python example.py    # 两条聊天 prompt 演示
 python bench.py      # 256 条随机序列压测，输出 tok/s
 ```
 
-也可 `pip install -e /root/autodl-tmp/nano-vllm` 安装后任意目录使用。3090 24 GB 跑 Qwen3-0.6B 余量很大，可尝试 `max_num_seqs=512`、`tensor_parallel_size=2`（3090 单卡 TP 无收益，仅学习代码路径）。
+也可 `pip install -e /root/nano-vllm` 安装后任意目录使用。3090 24 GB 跑 Qwen3-0.6B 余量很大，可尝试 `max_num_seqs=512`、`tensor_parallel_size=2`（3090 单卡 TP 无收益，仅学习代码路径）。
 
 2026-08-19 已验证：`python example.py` 跑通，两条 prompt（自我介绍 / 100 以内质数）均正常输出（含 think 块）。decode 单序列约 40-75 tok/s（enforce_eager=True 小 batch 场景）。
 
