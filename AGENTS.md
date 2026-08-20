@@ -50,6 +50,8 @@
 
 - 加 `-c http.version=HTTP/1.1` 重试克隆；或
 - 直接下载 tarball：`curl -L --http1.1 -o /tmp/x.tar.gz https://codeload.github.com/<owner>/<repo>/tar.gz/refs/heads/main`
+- GitHub **推送/访问超时**（connect 443 卡 ~130s）多为 IPv6 路由不通：`curl -4 https://github.com`
+  能通即可 `printf '20.205.243.166 github.com\n' >> /etc/hosts` 固定 IPv4 后重试（AutoDL 新机器同样会遇到）。
 
 ## 2. 项目概况
 
