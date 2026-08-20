@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 模型权重与 HF 缓存（太大，不入库；用 scripts/download_model.sh 重建）
+huggingface/
+**/huggingface/
+*.safetensors
+*.bin
+
+# 编译产物
+build/
+dist/
+*.whl
+
+# 日志与临时文件
+*.log
+nohup.out
+.tmp/
+
+# 大体积基准原始数据（保留小 CSV/JSON，忽略二进制/检查点）
+bench_output/*.pt
+bench_output/*.pkl
+
+# 编辑器/系统
+.DS_Store
+.idea/
+.vscode/
